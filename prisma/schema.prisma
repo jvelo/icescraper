@@ -1,0 +1,34 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator db {
+  provider = "go run github.com/prisma/prisma-client-go"
+}
+
+model Cast {
+  @@map(name: "cast")
+
+  id   Int    @id
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  name String
+  description  String?
+  url  String @unique
+}
+
+model Track {
+  @@map(name: "track")
+
+  id Int @default(autoincrement()) @id
+  castId Int @map(name: "cast_id")
+
+  startedAt DateTime @map(name: "started_at")
+  endedAt DateTime @map(name: "ended_at")
+  title String
+  listeners Int
+  cast Cast @relation(fields: [castId], references: [id])
+
+  @@unique([castId, title, startedAt])
+}

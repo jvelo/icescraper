@@ -1,0 +1,4 @@
+icecast_servers:
+  - url: https://pbbradio.com:8443
+    skipCertCheck: true
+
