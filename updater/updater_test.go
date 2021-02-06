@@ -58,6 +58,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestInsertOrUpdateTrack(t *testing.T) {
+	//t.Skip()
 	track := model.NewTrack("Darude – Sandstorm", 42)
 	record := &model.Record{
 		Cast:  cast,
@@ -77,6 +78,7 @@ func TestInsertOrUpdateTrack(t *testing.T) {
 }
 
 func TestInsertOrUpdateDifferentTracks(t *testing.T) {
+	//t.Skip()
 	track1 := model.NewTrack("Darude – Sandstorm", 42)
 	record1 := &model.Record{
 		Cast:  cast,
