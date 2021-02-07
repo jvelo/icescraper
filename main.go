@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:generate go run github.com/prisma/prisma-client-go generate
+
 package main
 
 import (
@@ -145,7 +147,11 @@ func run() error {
 							continue
 						}
 						var response Response
-						json.Unmarshal(body, &response)
+						err = json.Unmarshal(body, &response)
+						if err != nil {
+							log.Errorf("unmarshalling target: %v", err)
+							continue
+						}
 
 						cast := model.NewCast(
 							response.Stats.Source.Name,
@@ -163,8 +169,6 @@ func run() error {
 								Track: track,
 							}
 						}()
-
-						log.Infof("response: %v", response)
 					}
 				}()
 			}
