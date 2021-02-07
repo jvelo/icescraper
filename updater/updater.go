@@ -16,7 +16,7 @@ func Update(ctx context.Context, stream <-chan *model.Record) error {
 
 	defer func() {
 		if err := client.Prisma.Disconnect(); err != nil {
-			panic(err)
+			log.Fatalf("disconnecting: %v", err)
 		}
 	}()
 
@@ -28,12 +28,9 @@ func Update(ctx context.Context, stream <-chan *model.Record) error {
 			if err := upsertCast(ctx, client, record.Cast); err != nil {
 				log.Errorf("upserting record: %v", err)
 			}
-			log.Infof("upserting track %v", record.Track)
 			if err := upsertTrack(ctx, client, record); err != nil {
 				log.Errorf("upserting track: %v", err)
 			}
 		}
 	}
-
-	return nil
 }

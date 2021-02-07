@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/jvelo/icecast-monitor/model"
 	"github.com/jvelo/icecast-monitor/prisma/db"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"testing"
 )
@@ -59,14 +58,12 @@ func TestMain(m *testing.M) {
 func TestUpsertCast(t *testing.T) {
 	err := upsertCast(context.Background(), client, cast)
 	if err != nil {
-		log.Errorf("insert or update cast: %v", err)
-		t.Fail()
+		t.Errorf("insert or update cast: %v", err)
 	}
 
 	err = upsertCast(context.Background(), client, cast)
 	if err != nil {
-		log.Errorf("insert or update cast: %v", err)
-		t.Fail()
+		t.Errorf("insert or update cast: %v", err)
 	}
 
 	casts, err := client.Cast.FindMany().Exec(context.Background())
@@ -83,14 +80,12 @@ func TestUpsertTrack(t *testing.T) {
 	}
 	err := upsertTrack(context.Background(), client, record)
 	if err != nil {
-		log.Errorf("updating track: %v", err)
-		t.Fail()
+		t.Errorf("updating track: %v", err)
 	}
 
 	err = upsertTrack(context.Background(), client, record)
 	if err != nil {
-		log.Errorf("updating track: %v", err)
-		t.Fail()
+		t.Errorf("updating track: %v", err)
 	}
 }
 
@@ -126,3 +121,44 @@ func TestUpsertDifferentTracks(t *testing.T) {
 	}
 }
 
+func TestUpdateTrackListeners(t *testing.T) {
+	track := model.NewTrack("Darude – Sandstorm", 42)
+	record := &model.Record{
+		Cast:  cast,
+		Track: track,
+	}
+	err := upsertTrack(context.Background(), client, record)
+	if err != nil {
+		t.Errorf("updating track: %v", err)
+	}
+
+	track.Listeners = 37
+	err = upsertTrack(context.Background(), client, record)
+	if err != nil {
+		t.Errorf("updating track: %v", err)
+	}
+
+	fetched, err := client.Track.FindFirst().Exec(context.Background())
+	if err != nil {
+		t.Errorf("querying track: %v", err)
+	}
+
+	if fetched.Listeners != 42 {
+		t.Errorf("expected 42 listeners, got: %v", fetched.Listeners)
+	}
+
+	track.Listeners = 51
+	err = upsertTrack(context.Background(), client, record)
+	if err != nil {
+		t.Errorf("updating track: %v", err)
+	}
+
+	fetched, err = client.Track.FindFirst().Exec(context.Background())
+	if err != nil {
+		t.Errorf("querying track: %v", err)
+	}
+
+	if fetched.Listeners != 51 {
+		t.Errorf("expected 51 listeners, got: %v", fetched.Listeners)
+	}
+}
