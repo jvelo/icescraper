@@ -1,0 +1,19 @@
+scalar Time
+
+type Cast {
+    id: ID!
+    name: String!
+    description: String
+    url: String!
+    updatedAt: Time!
+}
+
+type Track {
+    id: ID!
+    title: String!
+    listeners: Int
+}
+
+type Query {
+    casts: [Cast!]!
+}

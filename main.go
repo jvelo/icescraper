@@ -13,6 +13,7 @@
 // limitations under the License.
 
 //go:generate go run github.com/prisma/prisma-client-go generate
+//go:generate go run github.com/99designs/gqlgen generate
 
 package main
 
