@@ -15,7 +15,7 @@ var (
 )
 
 func setUp() *db.PrismaClient {
-	if err := os.Setenv("DATABASE_URL", "file:../prisma/dev.db"); err != nil {
+	if err := os.Setenv("DATABASE_URL", "file:../prisma/test.db"); err != nil {
 		panic(err)
 	}
 
@@ -34,7 +34,7 @@ func setUp() *db.PrismaClient {
 		panic(err)
 	}
 
-	err := createOrReplaceCast(context.Background(), client, cast)
+	err := upsertCast(context.Background(), client, cast)
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,6 @@ func tearDown() {
 	if err := client.Prisma.Disconnect(); err != nil {
 		panic(err)
 	}
-
 	_ = os.Unsetenv("DATABASE_URL")
 }
 
@@ -57,28 +56,45 @@ func TestMain(m *testing.M) {
 	os.Exit(result)
 }
 
-func TestInsertOrUpdateTrack(t *testing.T) {
-	//t.Skip()
+func TestUpsertCast(t *testing.T) {
+	err := upsertCast(context.Background(), client, cast)
+	if err != nil {
+		log.Errorf("insert or update cast: %v", err)
+		t.Fail()
+	}
+
+	err = upsertCast(context.Background(), client, cast)
+	if err != nil {
+		log.Errorf("insert or update cast: %v", err)
+		t.Fail()
+	}
+
+	casts, err := client.Cast.FindMany().Exec(context.Background())
+	if len(casts) != 1 {
+		t.Errorf("expected 1 cast, got :%d", len(casts))
+	}
+}
+
+func TestUpsertTrack(t *testing.T) {
 	track := model.NewTrack("Darude – Sandstorm", 42)
 	record := &model.Record{
 		Cast:  cast,
 		Track: track,
 	}
-	err := updateTrack(context.Background(), client, record)
+	err := upsertTrack(context.Background(), client, record)
 	if err != nil {
 		log.Errorf("updating track: %v", err)
 		t.Fail()
 	}
 
-	err = updateTrack(context.Background(), client, record)
+	err = upsertTrack(context.Background(), client, record)
 	if err != nil {
 		log.Errorf("updating track: %v", err)
 		t.Fail()
 	}
 }
 
-func TestInsertOrUpdateDifferentTracks(t *testing.T) {
-	//t.Skip()
+func TestUpsertDifferentTracks(t *testing.T) {
 	track1 := model.NewTrack("Darude – Sandstorm", 42)
 	record1 := &model.Record{
 		Cast:  cast,
@@ -89,14 +105,14 @@ func TestInsertOrUpdateDifferentTracks(t *testing.T) {
 		Cast:  cast,
 		Track: track2,
 	}
-	err := updateTrack(context.Background(), client, record1)
+	err := upsertTrack(context.Background(), client, record1)
 	if err != nil {
-		t.Errorf("updating track: %v", err)
+		t.Errorf("upserting track: %v", err)
 	}
 
-	err = updateTrack(context.Background(), client, record2)
+	err = upsertTrack(context.Background(), client, record2)
 	if err != nil {
-		t.Errorf("updating track: %v", err)
+		t.Errorf("upserting track: %v", err)
 	}
 
 	tracksQuery := client.Track.FindMany()
@@ -110,21 +126,3 @@ func TestInsertOrUpdateDifferentTracks(t *testing.T) {
 	}
 }
 
-func TestInsertOrUpdateCast(t *testing.T) {
-	err := createOrReplaceCast(context.Background(), client, cast)
-	if err != nil {
-		log.Errorf("insert or update cast: %v", err)
-		t.Fail()
-	}
-
-	err = createOrReplaceCast(context.Background(), client, cast)
-	if err != nil {
-		log.Errorf("insert or update cast: %v", err)
-		t.Fail()
-	}
-
-	casts, err := client.Cast.FindMany().Exec(context.Background())
-	if len(casts) != 1 {
-		t.Errorf("expected 1 cast, got :%d", len(casts))
-	}
-}

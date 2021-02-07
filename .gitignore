@@ -1,3 +1,4 @@
 icecast-monitor
 .idea
 prisma/dev.db
+prisma/test.db

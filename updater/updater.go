@@ -25,11 +25,11 @@ func Update(ctx context.Context, stream <-chan *model.Record) error {
 		case <-ctx.Done():
 			return nil
 		case record := <-stream:
-			if err := createOrReplaceCast(ctx, client, record.Cast); err != nil {
+			if err := upsertCast(ctx, client, record.Cast); err != nil {
 				log.Errorf("upserting record: %v", err)
 			}
 			log.Infof("upserting track %v", record.Track)
-			if err := updateTrack(ctx, client, record); err != nil {
+			if err := upsertTrack(ctx, client, record); err != nil {
 				log.Errorf("upserting track: %v", err)
 			}
 		}
