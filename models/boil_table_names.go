@@ -4,9 +4,9 @@
 package models
 
 var TableNames = struct {
-	Cast  string
-	Track string
+	Stream string
+	Track  string
 }{
-	Cast:  "cast",
-	Track: "track",
+	Stream: "stream",
+	Track:  "track",
 }

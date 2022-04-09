@@ -88,12 +88,12 @@ var TrackWhere = struct {
 var TrackRels = struct {
 	Cast string
 }{
-	Cast: "Cast",
+	Cast: "Stream",
 }
 
 // trackR is where relationships are stored.
 type trackR struct {
-	Cast *Cast `boil:"Cast" json:"Cast" toml:"Cast" yaml:"Cast"`
+	Cast *Stream `boil:"Stream" json:"Stream" toml:"Stream" yaml:"Stream"`
 }
 
 // NewStruct creates a new relationship struct
@@ -318,7 +318,7 @@ func AddTrackHook(hookPoint boil.HookPoint, trackHook TrackHook) {
 	}
 }
 
-// One returns a single track db from the query.
+// One returns a single track record from the query.
 func (q trackQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Track, error) {
 	o := &Track{}
 
@@ -329,7 +329,7 @@ func (q trackQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Track,
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "model: failed to execute a one query for track")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for track")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -345,7 +345,7 @@ func (q trackQuery) All(ctx context.Context, exec boil.ContextExecutor) (TrackSl
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "model: failed to assign all query results to Track slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Track slice")
 	}
 
 	if len(trackAfterSelectHooks) != 0 {
@@ -368,7 +368,7 @@ func (q trackQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to count track rows")
+		return 0, errors.Wrap(err, "models: failed to count track rows")
 	}
 
 	return count, nil
@@ -384,22 +384,22 @@ func (q trackQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "model: failed to check if track exists")
+		return false, errors.Wrap(err, "models: failed to check if track exists")
 	}
 
 	return count > 0, nil
 }
 
 // Cast pointed to by the foreign key.
-func (o *Track) Cast(mods ...qm.QueryMod) castQuery {
+func (o *Track) Cast(mods ...qm.QueryMod) streamQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.CastID),
 	}
 
 	queryMods = append(queryMods, mods...)
 
-	query := Casts(queryMods...)
-	queries.SetFrom(query.Query, "\"cast\"")
+	query := Streams(queryMods...)
+	queries.SetFrom(query.Query, "\"stream\"")
 
 	return query
 }
@@ -446,8 +446,8 @@ func (trackL) LoadCast(ctx context.Context, e boil.ContextExecutor, singular boo
 	}
 
 	query := NewQuery(
-		qm.From(`cast`),
-		qm.WhereIn(`cast.id in ?`, args...),
+		qm.From(`stream`),
+		qm.WhereIn(`stream.id in ?`, args...),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -455,19 +455,19 @@ func (trackL) LoadCast(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	results, err := query.QueryContext(ctx, e)
 	if err != nil {
-		return errors.Wrap(err, "failed to eager load Cast")
+		return errors.Wrap(err, "failed to eager load Stream")
 	}
 
-	var resultSlice []*Cast
+	var resultSlice []*Stream
 	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Cast")
+		return errors.Wrap(err, "failed to bind eager loaded slice Stream")
 	}
 
 	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for cast")
+		return errors.Wrap(err, "failed to close results of eager load for stream")
 	}
 	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for cast")
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for stream")
 	}
 
 	if len(trackAfterSelectHooks) != 0 {
@@ -486,9 +486,9 @@ func (trackL) LoadCast(ctx context.Context, e boil.ContextExecutor, singular boo
 		foreign := resultSlice[0]
 		object.R.Cast = foreign
 		if foreign.R == nil {
-			foreign.R = &castR{}
+			foreign.R = &streamR{}
 		}
-		foreign.R.Tracks = append(foreign.R.Tracks, object)
+		foreign.R.CastTracks = append(foreign.R.CastTracks, object)
 		return nil
 	}
 
@@ -497,9 +497,9 @@ func (trackL) LoadCast(ctx context.Context, e boil.ContextExecutor, singular boo
 			if local.CastID == foreign.ID {
 				local.R.Cast = foreign
 				if foreign.R == nil {
-					foreign.R = &castR{}
+					foreign.R = &streamR{}
 				}
-				foreign.R.Tracks = append(foreign.R.Tracks, local)
+				foreign.R.CastTracks = append(foreign.R.CastTracks, local)
 				break
 			}
 		}
@@ -509,9 +509,9 @@ func (trackL) LoadCast(ctx context.Context, e boil.ContextExecutor, singular boo
 }
 
 // SetCast of the track to the related item.
-// Sets o.R.Cast to related.
-// Adds o to related.R.Tracks.
-func (o *Track) SetCast(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Cast) error {
+// Sets o.R.Stream to related.
+// Adds o to related.R.CastTracks.
+func (o *Track) SetCast(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Stream) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -545,11 +545,11 @@ func (o *Track) SetCast(ctx context.Context, exec boil.ContextExecutor, insert b
 	}
 
 	if related.R == nil {
-		related.R = &castR{
-			Tracks: TrackSlice{o},
+		related.R = &streamR{
+			CastTracks: TrackSlice{o},
 		}
 	} else {
-		related.R.Tracks = append(related.R.Tracks, o)
+		related.R.CastTracks = append(related.R.CastTracks, o)
 	}
 
 	return nil
@@ -561,7 +561,7 @@ func Tracks(mods ...qm.QueryMod) trackQuery {
 	return trackQuery{NewQuery(mods...)}
 }
 
-// FindTrack retrieves a single db by ID with an executor.
+// FindTrack retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
 func FindTrack(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Track, error) {
 	trackObj := &Track{}
@@ -581,7 +581,7 @@ func FindTrack(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "model: unable to select from track")
+		return nil, errors.Wrap(err, "models: unable to select from track")
 	}
 
 	if err = trackObj.doAfterSelectHooks(ctx, exec); err != nil {
@@ -591,11 +591,11 @@ func FindTrack(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 	return trackObj, nil
 }
 
-// Insert a single db using an executor.
+// Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *Track) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("model: no track provided for insertion")
+		return errors.New("models: no track provided for insertion")
 	}
 
 	var err error
@@ -658,7 +658,7 @@ func (o *Track) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "model: unable to insert into track")
+		return errors.Wrap(err, "models: unable to insert into track")
 	}
 
 	if !cached {
@@ -672,7 +672,7 @@ func (o *Track) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 
 // Update uses an executor to update the Track.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
-// Update does not automatically update the db in case of default values. Use .Reload() to refresh the records.
+// Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Track) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
@@ -693,7 +693,7 @@ func (o *Track) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("model: unable to update track, could not build whitelist")
+			return 0, errors.New("models: unable to update track, could not build whitelist")
 		}
 
 		cache.query = fmt.Sprintf("UPDATE \"track\" SET %s WHERE %s",
@@ -716,12 +716,12 @@ func (o *Track) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to update track row")
+		return 0, errors.Wrap(err, "models: unable to update track row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by update for track")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for track")
 	}
 
 	if !cached {
@@ -739,12 +739,12 @@ func (q trackQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to update all for track")
+		return 0, errors.Wrap(err, "models: unable to update all for track")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to retrieve rows affected for track")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for track")
 	}
 
 	return rowsAff, nil
@@ -758,7 +758,7 @@ func (o TrackSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 	}
 
 	if len(cols) == 0 {
-		return 0, errors.New("model: update all requires at least one column argument")
+		return 0, errors.New("models: update all requires at least one column argument")
 	}
 
 	colNames := make([]string, len(cols))
@@ -788,12 +788,12 @@ func (o TrackSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to update all in track slice")
+		return 0, errors.Wrap(err, "models: unable to update all in track slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to retrieve rows affected all in update all track")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all track")
 	}
 	return rowsAff, nil
 }
@@ -802,7 +802,7 @@ func (o TrackSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *Track) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("model: no track provided for upsert")
+		return errors.New("models: no track provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
@@ -859,7 +859,7 @@ func (o *Track) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("model: unable to upsert track, could not build update column list")
+			return errors.New("models: unable to upsert track, could not build update column list")
 		}
 
 		conflict := conflictColumns
@@ -902,7 +902,7 @@ func (o *Track) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		_, err = exec.ExecContext(ctx, cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "model: unable to upsert track")
+		return errors.Wrap(err, "models: unable to upsert track")
 	}
 
 	if !cached {
@@ -914,11 +914,11 @@ func (o *Track) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single Track db with an executor.
-// Delete will match against the primary key column to find the db to delete.
+// Delete deletes a single Track record with an executor.
+// Delete will match against the primary key column to find the record to delete.
 func (o *Track) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("model: no Track provided for delete")
+		return 0, errors.New("models: no Track provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
@@ -935,12 +935,12 @@ func (o *Track) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to delete from track")
+		return 0, errors.Wrap(err, "models: unable to delete from track")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by delete for track")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for track")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -953,19 +953,19 @@ func (o *Track) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 // DeleteAll deletes all matching rows.
 func (q trackQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("model: no trackQuery provided for delete all")
+		return 0, errors.New("models: no trackQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to delete all from track")
+		return 0, errors.Wrap(err, "models: unable to delete all from track")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by deleteall for track")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for track")
 	}
 
 	return rowsAff, nil
@@ -1001,12 +1001,12 @@ func (o TrackSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to delete all from track slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from track slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by deleteall for track")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for track")
 	}
 
 	if len(trackAfterDeleteHooks) != 0 {
@@ -1053,7 +1053,7 @@ func (o *TrackSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "model: unable to reload all in TrackSlice")
+		return errors.Wrap(err, "models: unable to reload all in TrackSlice")
 	}
 
 	*o = slice
@@ -1075,7 +1075,7 @@ func TrackExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, 
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "model: unable to check if track exists")
+		return false, errors.Wrap(err, "models: unable to check if track exists")
 	}
 
 	return exists, nil

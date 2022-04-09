@@ -12,7 +12,7 @@ func Update(ctx context.Context, stream <-chan *db.Record) error {
 		case <-ctx.Done():
 			return nil
 		case record := <-stream:
-			if err := upsertCast(ctx, record.Cast); err != nil {
+			if err := upsertCast(ctx, record.Stream); err != nil {
 				log.Errorf("upserting db: %v", err)
 			}
 			if err := upsertTrack(ctx, record); err != nil {

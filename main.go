@@ -168,8 +168,8 @@ func run() error {
 
 						go func() {
 							stream <- &database.Record{
-								Cast:  cast,
-								Track: track,
+								Stream: cast,
+								Track:  track,
 							}
 						}()
 					}

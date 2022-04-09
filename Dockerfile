@@ -1,4 +1,4 @@
-FROM golang:1.15 as build
+FROM golang:1.16 as build
 
 WORKDIR /app
 
@@ -6,13 +6,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# prefetch the binaries, so that they will be cached and not downloaded on each change
-RUN go run github.com/prisma/prisma-client-go prefetch
-
 COPY . ./
+COPY ./.env.prod ./env
 
-# generate the Prisma Client Go client
-RUN go generate ./...
 
 # build the binary with all dependencies
 RUN go build -o /icecast-monitor .

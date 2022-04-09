@@ -5,12 +5,12 @@ import (
 	"github.com/volatiletech/null/v8"
 )
 
-type Cast = models.Cast
+type Cast = models.Stream
 type Track = models.Track
 
 type Record struct {
-	Cast  *Cast
-	Track *Track
+	Stream *Cast
+	Track  *Track
 }
 
 func NewCast(name string, description string, url string) *Cast {

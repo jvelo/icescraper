@@ -3,3 +3,5 @@ icecast-monitor
 prisma/dev.db
 prisma/test.db
 .help
+.env
+.env.prod

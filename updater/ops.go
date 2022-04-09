@@ -52,7 +52,7 @@ ON CONFLICT (url) DO UPDATE
 
 func upsertTrack(ctx context.Context, record *db.Record) error {
 	now := time.Now()
-	_, err := boil.GetDB().Exec(upsertTrackQuery, record.Cast.Name, record.Track.Title, now, now, record.Track.Listeners)
+	_, err := boil.GetDB().Exec(upsertTrackQuery, record.Stream.Name, record.Track.Title, now, now, record.Track.Listeners)
 	if err != nil {
 		return err
 	}

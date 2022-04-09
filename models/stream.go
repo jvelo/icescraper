@@ -22,8 +22,8 @@ import (
 	"github.com/volatiletech/strmangle"
 )
 
-// Cast is an object representing the database table.
-type Cast struct {
+// Stream is an object representing the database table.
+type Stream struct {
 	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -31,11 +31,11 @@ type Cast struct {
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	URL         string      `boil:"url" json:"url" toml:"url" yaml:"url"`
 
-	R *castR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L castL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *streamR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L streamL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var CastColumns = struct {
+var StreamColumns = struct {
 	ID          string
 	CreatedAt   string
 	UpdatedAt   string
@@ -51,7 +51,7 @@ var CastColumns = struct {
 	URL:         "url",
 }
 
-var CastTableColumns = struct {
+var StreamTableColumns = struct {
 	ID          string
 	CreatedAt   string
 	UpdatedAt   string
@@ -59,12 +59,12 @@ var CastTableColumns = struct {
 	Description string
 	URL         string
 }{
-	ID:          "cast.id",
-	CreatedAt:   "cast.created_at",
-	UpdatedAt:   "cast.updated_at",
-	Name:        "cast.name",
-	Description: "cast.description",
-	URL:         "cast.url",
+	ID:          "stream.id",
+	CreatedAt:   "stream.created_at",
+	UpdatedAt:   "stream.updated_at",
+	Name:        "stream.name",
+	Description: "stream.description",
+	URL:         "stream.url",
 }
 
 // Generated where
@@ -160,7 +160,7 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-var CastWhere = struct {
+var StreamWhere = struct {
 	ID          whereHelperint
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
@@ -168,65 +168,65 @@ var CastWhere = struct {
 	Description whereHelpernull_String
 	URL         whereHelperstring
 }{
-	ID:          whereHelperint{field: "\"cast\".\"id\""},
-	CreatedAt:   whereHelpertime_Time{field: "\"cast\".\"created_at\""},
-	UpdatedAt:   whereHelpertime_Time{field: "\"cast\".\"updated_at\""},
-	Name:        whereHelperstring{field: "\"cast\".\"name\""},
-	Description: whereHelpernull_String{field: "\"cast\".\"description\""},
-	URL:         whereHelperstring{field: "\"cast\".\"url\""},
+	ID:          whereHelperint{field: "\"stream\".\"id\""},
+	CreatedAt:   whereHelpertime_Time{field: "\"stream\".\"created_at\""},
+	UpdatedAt:   whereHelpertime_Time{field: "\"stream\".\"updated_at\""},
+	Name:        whereHelperstring{field: "\"stream\".\"name\""},
+	Description: whereHelpernull_String{field: "\"stream\".\"description\""},
+	URL:         whereHelperstring{field: "\"stream\".\"url\""},
 }
 
-// CastRels is where relationship names are stored.
-var CastRels = struct {
-	Tracks string
+// StreamRels is where relationship names are stored.
+var StreamRels = struct {
+	CastTracks string
 }{
-	Tracks: "Tracks",
+	CastTracks: "CastTracks",
 }
 
-// castR is where relationships are stored.
-type castR struct {
-	Tracks TrackSlice `boil:"Tracks" json:"Tracks" toml:"Tracks" yaml:"Tracks"`
+// streamR is where relationships are stored.
+type streamR struct {
+	CastTracks TrackSlice `boil:"CastTracks" json:"CastTracks" toml:"CastTracks" yaml:"CastTracks"`
 }
 
 // NewStruct creates a new relationship struct
-func (*castR) NewStruct() *castR {
-	return &castR{}
+func (*streamR) NewStruct() *streamR {
+	return &streamR{}
 }
 
-// castL is where Load methods for each relationship are stored.
-type castL struct{}
+// streamL is where Load methods for each relationship are stored.
+type streamL struct{}
 
 var (
-	castAllColumns            = []string{"id", "created_at", "updated_at", "name", "description", "url"}
-	castColumnsWithoutDefault = []string{"id", "updated_at", "name", "url"}
-	castColumnsWithDefault    = []string{"created_at", "description"}
-	castPrimaryKeyColumns     = []string{"id"}
-	castGeneratedColumns      = []string{}
+	streamAllColumns            = []string{"id", "created_at", "updated_at", "name", "description", "url"}
+	streamColumnsWithoutDefault = []string{"updated_at", "name", "url"}
+	streamColumnsWithDefault    = []string{"id", "created_at", "description"}
+	streamPrimaryKeyColumns     = []string{"id"}
+	streamGeneratedColumns      = []string{}
 )
 
 type (
-	// CastSlice is an alias for a slice of pointers to Cast.
-	// This should almost always be used instead of []Cast.
-	CastSlice []*Cast
-	// CastHook is the signature for custom Cast hook methods
-	CastHook func(context.Context, boil.ContextExecutor, *Cast) error
+	// StreamSlice is an alias for a slice of pointers to Stream.
+	// This should almost always be used instead of []Stream.
+	StreamSlice []*Stream
+	// StreamHook is the signature for custom Stream hook methods
+	StreamHook func(context.Context, boil.ContextExecutor, *Stream) error
 
-	castQuery struct {
+	streamQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	castType                 = reflect.TypeOf(&Cast{})
-	castMapping              = queries.MakeStructMapping(castType)
-	castPrimaryKeyMapping, _ = queries.BindMapping(castType, castMapping, castPrimaryKeyColumns)
-	castInsertCacheMut       sync.RWMutex
-	castInsertCache          = make(map[string]insertCache)
-	castUpdateCacheMut       sync.RWMutex
-	castUpdateCache          = make(map[string]updateCache)
-	castUpsertCacheMut       sync.RWMutex
-	castUpsertCache          = make(map[string]insertCache)
+	streamType                 = reflect.TypeOf(&Stream{})
+	streamMapping              = queries.MakeStructMapping(streamType)
+	streamPrimaryKeyMapping, _ = queries.BindMapping(streamType, streamMapping, streamPrimaryKeyColumns)
+	streamInsertCacheMut       sync.RWMutex
+	streamInsertCache          = make(map[string]insertCache)
+	streamUpdateCacheMut       sync.RWMutex
+	streamUpdateCache          = make(map[string]updateCache)
+	streamUpsertCacheMut       sync.RWMutex
+	streamUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -237,27 +237,27 @@ var (
 	_ = qmhelper.Where
 )
 
-var castAfterSelectHooks []CastHook
+var streamAfterSelectHooks []StreamHook
 
-var castBeforeInsertHooks []CastHook
-var castAfterInsertHooks []CastHook
+var streamBeforeInsertHooks []StreamHook
+var streamAfterInsertHooks []StreamHook
 
-var castBeforeUpdateHooks []CastHook
-var castAfterUpdateHooks []CastHook
+var streamBeforeUpdateHooks []StreamHook
+var streamAfterUpdateHooks []StreamHook
 
-var castBeforeDeleteHooks []CastHook
-var castAfterDeleteHooks []CastHook
+var streamBeforeDeleteHooks []StreamHook
+var streamAfterDeleteHooks []StreamHook
 
-var castBeforeUpsertHooks []CastHook
-var castAfterUpsertHooks []CastHook
+var streamBeforeUpsertHooks []StreamHook
+var streamAfterUpsertHooks []StreamHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Cast) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castAfterSelectHooks {
+	for _, hook := range streamAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -267,12 +267,12 @@ func (o *Cast) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Cast) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castBeforeInsertHooks {
+	for _, hook := range streamBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -282,12 +282,12 @@ func (o *Cast) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Cast) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castAfterInsertHooks {
+	for _, hook := range streamAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -297,12 +297,12 @@ func (o *Cast) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Cast) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castBeforeUpdateHooks {
+	for _, hook := range streamBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -312,12 +312,12 @@ func (o *Cast) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Cast) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castAfterUpdateHooks {
+	for _, hook := range streamAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -327,12 +327,12 @@ func (o *Cast) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Cast) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castBeforeDeleteHooks {
+	for _, hook := range streamBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -342,12 +342,12 @@ func (o *Cast) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Cast) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castAfterDeleteHooks {
+	for _, hook := range streamAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -357,12 +357,12 @@ func (o *Cast) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Cast) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castBeforeUpsertHooks {
+	for _, hook := range streamBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -372,12 +372,12 @@ func (o *Cast) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Cast) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Stream) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range castAfterUpsertHooks {
+	for _, hook := range streamAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -386,33 +386,33 @@ func (o *Cast) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor
 	return nil
 }
 
-// AddCastHook registers your hook function for all future operations.
-func AddCastHook(hookPoint boil.HookPoint, castHook CastHook) {
+// AddStreamHook registers your hook function for all future operations.
+func AddStreamHook(hookPoint boil.HookPoint, streamHook StreamHook) {
 	switch hookPoint {
 	case boil.AfterSelectHook:
-		castAfterSelectHooks = append(castAfterSelectHooks, castHook)
+		streamAfterSelectHooks = append(streamAfterSelectHooks, streamHook)
 	case boil.BeforeInsertHook:
-		castBeforeInsertHooks = append(castBeforeInsertHooks, castHook)
+		streamBeforeInsertHooks = append(streamBeforeInsertHooks, streamHook)
 	case boil.AfterInsertHook:
-		castAfterInsertHooks = append(castAfterInsertHooks, castHook)
+		streamAfterInsertHooks = append(streamAfterInsertHooks, streamHook)
 	case boil.BeforeUpdateHook:
-		castBeforeUpdateHooks = append(castBeforeUpdateHooks, castHook)
+		streamBeforeUpdateHooks = append(streamBeforeUpdateHooks, streamHook)
 	case boil.AfterUpdateHook:
-		castAfterUpdateHooks = append(castAfterUpdateHooks, castHook)
+		streamAfterUpdateHooks = append(streamAfterUpdateHooks, streamHook)
 	case boil.BeforeDeleteHook:
-		castBeforeDeleteHooks = append(castBeforeDeleteHooks, castHook)
+		streamBeforeDeleteHooks = append(streamBeforeDeleteHooks, streamHook)
 	case boil.AfterDeleteHook:
-		castAfterDeleteHooks = append(castAfterDeleteHooks, castHook)
+		streamAfterDeleteHooks = append(streamAfterDeleteHooks, streamHook)
 	case boil.BeforeUpsertHook:
-		castBeforeUpsertHooks = append(castBeforeUpsertHooks, castHook)
+		streamBeforeUpsertHooks = append(streamBeforeUpsertHooks, streamHook)
 	case boil.AfterUpsertHook:
-		castAfterUpsertHooks = append(castAfterUpsertHooks, castHook)
+		streamAfterUpsertHooks = append(streamAfterUpsertHooks, streamHook)
 	}
 }
 
-// One returns a single cast db from the query.
-func (q castQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Cast, error) {
-	o := &Cast{}
+// One returns a single stream record from the query.
+func (q streamQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Stream, error) {
+	o := &Stream{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -421,7 +421,7 @@ func (q castQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Cast, e
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "model: failed to execute a one query for cast")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for stream")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -431,16 +431,16 @@ func (q castQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Cast, e
 	return o, nil
 }
 
-// All returns all Cast records from the query.
-func (q castQuery) All(ctx context.Context, exec boil.ContextExecutor) (CastSlice, error) {
-	var o []*Cast
+// All returns all Stream records from the query.
+func (q streamQuery) All(ctx context.Context, exec boil.ContextExecutor) (StreamSlice, error) {
+	var o []*Stream
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "model: failed to assign all query results to Cast slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Stream slice")
 	}
 
-	if len(castAfterSelectHooks) != 0 {
+	if len(streamAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -451,8 +451,8 @@ func (q castQuery) All(ctx context.Context, exec boil.ContextExecutor) (CastSlic
 	return o, nil
 }
 
-// Count returns the count of all Cast records in the query.
-func (q castQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Stream records in the query.
+func (q streamQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -460,14 +460,14 @@ func (q castQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64,
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to count cast rows")
+		return 0, errors.Wrap(err, "models: failed to count stream rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q castQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q streamQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -476,14 +476,14 @@ func (q castQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "model: failed to check if cast exists")
+		return false, errors.Wrap(err, "models: failed to check if stream exists")
 	}
 
 	return count > 0, nil
 }
 
-// Tracks retrieves all the track's Tracks with an executor.
-func (o *Cast) Tracks(mods ...qm.QueryMod) trackQuery {
+// CastTracks retrieves all the track's Tracks with an executor via cast_id column.
+func (o *Stream) CastTracks(mods ...qm.QueryMod) trackQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
@@ -503,29 +503,29 @@ func (o *Cast) Tracks(mods ...qm.QueryMod) trackQuery {
 	return query
 }
 
-// LoadTracks allows an eager lookup of values, cached into the
+// LoadCastTracks allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (castL) LoadTracks(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCast interface{}, mods queries.Applicator) error {
-	var slice []*Cast
-	var object *Cast
+func (streamL) LoadCastTracks(ctx context.Context, e boil.ContextExecutor, singular bool, maybeStream interface{}, mods queries.Applicator) error {
+	var slice []*Stream
+	var object *Stream
 
 	if singular {
-		object = maybeCast.(*Cast)
+		object = maybeStream.(*Stream)
 	} else {
-		slice = *maybeCast.(*[]*Cast)
+		slice = *maybeStream.(*[]*Stream)
 	}
 
 	args := make([]interface{}, 0, 1)
 	if singular {
 		if object.R == nil {
-			object.R = &castR{}
+			object.R = &streamR{}
 		}
 		args = append(args, object.ID)
 	} else {
 	Outer:
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &castR{}
+				obj.R = &streamR{}
 			}
 
 			for _, a := range args {
@@ -575,7 +575,7 @@ func (castL) LoadTracks(ctx context.Context, e boil.ContextExecutor, singular bo
 		}
 	}
 	if singular {
-		object.R.Tracks = resultSlice
+		object.R.CastTracks = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
 				foreign.R = &trackR{}
@@ -588,7 +588,7 @@ func (castL) LoadTracks(ctx context.Context, e boil.ContextExecutor, singular bo
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
 			if local.ID == foreign.CastID {
-				local.R.Tracks = append(local.R.Tracks, foreign)
+				local.R.CastTracks = append(local.R.CastTracks, foreign)
 				if foreign.R == nil {
 					foreign.R = &trackR{}
 				}
@@ -601,11 +601,11 @@ func (castL) LoadTracks(ctx context.Context, e boil.ContextExecutor, singular bo
 	return nil
 }
 
-// AddTracks adds the given related objects to the existing relationships
-// of the cast, optionally inserting them as new records.
-// Appends related to o.R.Tracks.
-// Sets related.R.Cast appropriately.
-func (o *Cast) AddTracks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Track) error {
+// AddCastTracks adds the given related objects to the existing relationships
+// of the stream, optionally inserting them as new records.
+// Appends related to o.R.CastTracks.
+// Sets related.R.Stream appropriately.
+func (o *Stream) AddCastTracks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Track) error {
 	var err error
 	for _, rel := range related {
 		if insert {
@@ -635,11 +635,11 @@ func (o *Cast) AddTracks(ctx context.Context, exec boil.ContextExecutor, insert 
 	}
 
 	if o.R == nil {
-		o.R = &castR{
-			Tracks: related,
+		o.R = &streamR{
+			CastTracks: related,
 		}
 	} else {
-		o.R.Tracks = append(o.R.Tracks, related...)
+		o.R.CastTracks = append(o.R.CastTracks, related...)
 	}
 
 	for _, rel := range related {
@@ -654,47 +654,47 @@ func (o *Cast) AddTracks(ctx context.Context, exec boil.ContextExecutor, insert 
 	return nil
 }
 
-// Casts retrieves all the records using an executor.
-func Casts(mods ...qm.QueryMod) castQuery {
-	mods = append(mods, qm.From("\"cast\""))
-	return castQuery{NewQuery(mods...)}
+// Streams retrieves all the records using an executor.
+func Streams(mods ...qm.QueryMod) streamQuery {
+	mods = append(mods, qm.From("\"stream\""))
+	return streamQuery{NewQuery(mods...)}
 }
 
-// FindCast retrieves a single db by ID with an executor.
+// FindStream retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCast(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Cast, error) {
-	castObj := &Cast{}
+func FindStream(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Stream, error) {
+	streamObj := &Stream{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"cast\" where \"id\"=$1", sel,
+		"select %s from \"stream\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, castObj)
+	err := q.Bind(ctx, exec, streamObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "model: unable to select from cast")
+		return nil, errors.Wrap(err, "models: unable to select from stream")
 	}
 
-	if err = castObj.doAfterSelectHooks(ctx, exec); err != nil {
-		return castObj, err
+	if err = streamObj.doAfterSelectHooks(ctx, exec); err != nil {
+		return streamObj, err
 	}
 
-	return castObj, nil
+	return streamObj, nil
 }
 
-// Insert a single db using an executor.
+// Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Cast) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Stream) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("model: no cast provided for insertion")
+		return errors.New("models: no stream provided for insertion")
 	}
 
 	var err error
@@ -713,33 +713,33 @@ func (o *Cast) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(castColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(streamColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	castInsertCacheMut.RLock()
-	cache, cached := castInsertCache[key]
-	castInsertCacheMut.RUnlock()
+	streamInsertCacheMut.RLock()
+	cache, cached := streamInsertCache[key]
+	streamInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			castAllColumns,
-			castColumnsWithDefault,
-			castColumnsWithoutDefault,
+			streamAllColumns,
+			streamColumnsWithDefault,
+			streamColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(castType, castMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(streamType, streamMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(castType, castMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(streamType, streamMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"cast\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"stream\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"cast\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"stream\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -767,22 +767,22 @@ func (o *Cast) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "model: unable to insert into cast")
+		return errors.Wrap(err, "models: unable to insert into stream")
 	}
 
 	if !cached {
-		castInsertCacheMut.Lock()
-		castInsertCache[key] = cache
-		castInsertCacheMut.Unlock()
+		streamInsertCacheMut.Lock()
+		streamInsertCache[key] = cache
+		streamInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the Cast.
+// Update uses an executor to update the Stream.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
-// Update does not automatically update the db in case of default values. Use .Reload() to refresh the records.
-func (o *Cast) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+// Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
+func (o *Stream) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
@@ -794,28 +794,28 @@ func (o *Cast) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	castUpdateCacheMut.RLock()
-	cache, cached := castUpdateCache[key]
-	castUpdateCacheMut.RUnlock()
+	streamUpdateCacheMut.RLock()
+	cache, cached := streamUpdateCache[key]
+	streamUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			castAllColumns,
-			castPrimaryKeyColumns,
+			streamAllColumns,
+			streamPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("model: unable to update cast, could not build whitelist")
+			return 0, errors.New("models: unable to update stream, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"cast\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"stream\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
-			strmangle.WhereClause("\"", "\"", len(wl)+1, castPrimaryKeyColumns),
+			strmangle.WhereClause("\"", "\"", len(wl)+1, streamPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(castType, castMapping, append(wl, castPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(streamType, streamMapping, append(wl, streamPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -831,49 +831,49 @@ func (o *Cast) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to update cast row")
+		return 0, errors.Wrap(err, "models: unable to update stream row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by update for cast")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for stream")
 	}
 
 	if !cached {
-		castUpdateCacheMut.Lock()
-		castUpdateCache[key] = cache
-		castUpdateCacheMut.Unlock()
+		streamUpdateCacheMut.Lock()
+		streamUpdateCache[key] = cache
+		streamUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q castQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q streamQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to update all for cast")
+		return 0, errors.Wrap(err, "models: unable to update all for stream")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to retrieve rows affected for cast")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for stream")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o CastSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o StreamSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
 	}
 
 	if len(cols) == 0 {
-		return 0, errors.New("model: update all requires at least one column argument")
+		return 0, errors.New("models: update all requires at least one column argument")
 	}
 
 	colNames := make([]string, len(cols))
@@ -888,13 +888,13 @@ func (o CastSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), castPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), streamPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"cast\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"stream\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, castPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, streamPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -903,21 +903,21 @@ func (o CastSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to update all in cast slice")
+		return 0, errors.Wrap(err, "models: unable to update all in stream slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to retrieve rows affected all in update all cast")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all stream")
 	}
 	return rowsAff, nil
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Cast) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Stream) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("model: no cast provided for upsert")
+		return errors.New("models: no stream provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
@@ -932,7 +932,7 @@ func (o *Cast) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(castColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(streamColumnsWithDefault, o)
 
 	// Build cache key in-line uglily - mysql vs psql problems
 	buf := strmangle.GetBuffer()
@@ -962,42 +962,42 @@ func (o *Cast) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	castUpsertCacheMut.RLock()
-	cache, cached := castUpsertCache[key]
-	castUpsertCacheMut.RUnlock()
+	streamUpsertCacheMut.RLock()
+	cache, cached := streamUpsertCache[key]
+	streamUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			castAllColumns,
-			castColumnsWithDefault,
-			castColumnsWithoutDefault,
+			streamAllColumns,
+			streamColumnsWithDefault,
+			streamColumnsWithoutDefault,
 			nzDefaults,
 		)
 
 		update := updateColumns.UpdateColumnSet(
-			castAllColumns,
-			castPrimaryKeyColumns,
+			streamAllColumns,
+			streamPrimaryKeyColumns,
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("model: unable to upsert cast, could not build update column list")
+			return errors.New("models: unable to upsert stream, could not build update column list")
 		}
 
 		conflict := conflictColumns
 		if len(conflict) == 0 {
-			conflict = make([]string, len(castPrimaryKeyColumns))
-			copy(conflict, castPrimaryKeyColumns)
+			conflict = make([]string, len(streamPrimaryKeyColumns))
+			copy(conflict, streamPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"cast\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"stream\"", updateOnConflict, ret, update, conflict, insert)
 
-		cache.valueMapping, err = queries.BindMapping(castType, castMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(streamType, streamMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(castType, castMapping, ret)
+			cache.retMapping, err = queries.BindMapping(streamType, streamMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -1025,31 +1025,31 @@ func (o *Cast) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 		_, err = exec.ExecContext(ctx, cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "model: unable to upsert cast")
+		return errors.Wrap(err, "models: unable to upsert stream")
 	}
 
 	if !cached {
-		castUpsertCacheMut.Lock()
-		castUpsertCache[key] = cache
-		castUpsertCacheMut.Unlock()
+		streamUpsertCacheMut.Lock()
+		streamUpsertCache[key] = cache
+		streamUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single Cast db with an executor.
-// Delete will match against the primary key column to find the db to delete.
-func (o *Cast) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Delete deletes a single Stream record with an executor.
+// Delete will match against the primary key column to find the record to delete.
+func (o *Stream) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("model: no Cast provided for delete")
+		return 0, errors.New("models: no Stream provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), castPrimaryKeyMapping)
-	sql := "DELETE FROM \"cast\" WHERE \"id\"=$1"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), streamPrimaryKeyMapping)
+	sql := "DELETE FROM \"stream\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1058,12 +1058,12 @@ func (o *Cast) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to delete from cast")
+		return 0, errors.Wrap(err, "models: unable to delete from stream")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by delete for cast")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for stream")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -1074,33 +1074,33 @@ func (o *Cast) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 }
 
 // DeleteAll deletes all matching rows.
-func (q castQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q streamQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("model: no castQuery provided for delete all")
+		return 0, errors.New("models: no streamQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to delete all from cast")
+		return 0, errors.Wrap(err, "models: unable to delete all from stream")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by deleteall for cast")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for stream")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o CastSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o StreamSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(castBeforeDeleteHooks) != 0 {
+	if len(streamBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1110,12 +1110,12 @@ func (o CastSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), castPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), streamPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"cast\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, castPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM \"stream\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, streamPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1124,15 +1124,15 @@ func (o CastSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "model: unable to delete all from cast slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from stream slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "model: failed to get rows affected by deleteall for cast")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for stream")
 	}
 
-	if len(castAfterDeleteHooks) != 0 {
+	if len(streamAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1145,8 +1145,8 @@ func (o CastSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Cast) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindCast(ctx, exec, o.ID)
+func (o *Stream) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindStream(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1157,26 +1157,26 @@ func (o *Cast) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *CastSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *StreamSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := CastSlice{}
+	slice := StreamSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), castPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), streamPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"cast\".* FROM \"cast\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, castPrimaryKeyColumns, len(*o))
+	sql := "SELECT \"stream\".* FROM \"stream\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, streamPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "model: unable to reload all in CastSlice")
+		return errors.Wrap(err, "models: unable to reload all in StreamSlice")
 	}
 
 	*o = slice
@@ -1184,10 +1184,10 @@ func (o *CastSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 	return nil
 }
 
-// CastExists checks if the Cast row exists.
-func CastExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// StreamExists checks if the Stream row exists.
+func StreamExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"cast\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"stream\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1198,7 +1198,7 @@ func CastExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, e
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "model: unable to check if cast exists")
+		return false, errors.Wrap(err, "models: unable to check if stream exists")
 	}
 
 	return exists, nil
