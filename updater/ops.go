@@ -2,16 +2,16 @@ package updater
 
 import (
 	"context"
-	"github.com/jvelo/icecast-monitor/model"
-	"github.com/jvelo/icecast-monitor/prisma/db"
+	"github.com/jvelo/icecast-monitor/db"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"time"
 )
 
 const upsertTrackQuery = `
 -- Upsert track
-WITH track_cast AS (SELECT id FROM cast WHERE name = ? LIMIT 1),
+WITH track_cast AS (SELECT id FROM stream WHERE name = $1 LIMIT 1),
      latest_track AS (SELECT * FROM track ORDER BY started_at DESC LIMIT 1),
-     new_track (title, started_at, ended_at, listeners) AS (SELECT * FROM (VALUES (?, ?, ?, ?))),
+     new_track (title, started_at, ended_at, listeners) AS (SELECT * FROM (VALUES ($2, $3::timestamp, $4::timestamp, $5::int)) v),
      raw (title, started_at, cast_id, ended_at, listeners) AS (
          SELECT title,
                 CASE
@@ -23,7 +23,7 @@ WITH track_cast AS (SELECT id FROM cast WHERE name = ? LIMIT 1),
                 ended_at,
                 CASE
                     WHEN (SELECT title FROM new_track) = (SELECT title FROM latest_track) THEN
-                         MAX((SELECT listeners from new_track), COALESCE((SELECT listeners FROM latest_track), -1))
+                         GREATEST((SELECT listeners from new_track), COALESCE((SELECT listeners FROM latest_track), -1))
                     ELSE (SELECT listeners FROM new_track)
                     END
          FROM new_track
@@ -40,9 +40,9 @@ const upsertCastQuery = `
 -- Upsert cast
 WITH new_cast (name, description, url, updated_at) AS (
     SELECT *
-    FROM (VALUES (?, ?, ?, ?))
+    FROM (VALUES ($1, $2, $3, $4::timestamp)) v
 )
-INSERT INTO cast(name, description, url, updated_at)
+INSERT INTO stream (name, description, url, updated_at)
 SELECT * FROM new_cast WHERE true
 ON CONFLICT (url) DO UPDATE
     SET name        = (SELECT name FROM new_cast),
@@ -50,19 +50,17 @@ ON CONFLICT (url) DO UPDATE
         updated_at  = (SELECT updated_at FROM new_cast)
 `
 
-func upsertTrack(ctx context.Context, client *db.PrismaClient, record *model.Record) error {
-	now := time.Now().Format(time.RFC3339)
-	query := client.Prisma.ExecuteRaw(upsertTrackQuery, record.Cast.Name, record.Track.Title, now, now, record.Track.Listeners)
-	_, err := query.Exec(ctx)
+func upsertTrack(ctx context.Context, record *db.Record) error {
+	now := time.Now()
+	_, err := boil.GetDB().Exec(upsertTrackQuery, record.Cast.Name, record.Track.Title, now, now, record.Track.Listeners)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func upsertCast(ctx context.Context, client *db.PrismaClient, cast *model.Cast) error {
-	query := client.Prisma.ExecuteRaw(upsertCastQuery, cast.Name, cast.Description, cast.URL, time.Now().Format(time.RFC3339))
-	_, err := query.Exec(ctx)
+func upsertCast(ctx context.Context, cast *db.Cast) error {
+	_, err := boil.GetDB().Exec(upsertCastQuery, cast.Name, cast.Description, cast.URL, time.Now())
 	if err != nil {
 		return err
 	}

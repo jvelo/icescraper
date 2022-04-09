@@ -1,9 +1,12 @@
-package model
+package db
 
-import "github.com/jvelo/icecast-monitor/prisma/db"
+import (
+	"github.com/jvelo/icecast-monitor/models"
+	"github.com/volatiletech/null/v8"
+)
 
-type Cast = db.InnerCast
-type Track = db.InnerTrack
+type Cast = models.Cast
+type Track = models.Track
 
 type Record struct {
 	Cast  *Cast
@@ -11,15 +14,15 @@ type Record struct {
 }
 
 func NewCast(name string, description string, url string) *Cast {
-	return &db.InnerCast{
+	return &Cast{
 		Name:        name,
 		URL:         url,
-		Description: &description,
+		Description: null.StringFrom(description),
 	}
 }
 
 func NewTrack(title string, listeners int) *Track {
-	return &db.InnerTrack{
+	return &Track{
 		Title:     title,
 		Listeners: listeners,
 	}

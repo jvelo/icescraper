@@ -1,0 +1,14 @@
+output   = "models"
+wipe     = true
+no-tests = true
+add-enum-types = true
+
+[psql]
+  dbname = "casts"
+  host   = "localhost"
+  port   = 5432
+  user   = "jerome"
+  pass   = ""
+  schema = "public"
+  sslmode = "disable"
+  blacklist = ["_prisma_migrations"]

@@ -12,21 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run github.com/prisma/prisma-client-go generate
+//go:generate sqlboiler psql
 
 package main
 
 import (
 	"context"
 	"crypto/tls"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/jvelo/icecast-monitor/config"
-	"github.com/jvelo/icecast-monitor/model"
+	database "github.com/jvelo/icecast-monitor/db"
 	"github.com/jvelo/icecast-monitor/updater"
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/log"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -37,7 +39,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/jvelo/icecast-monitor/prisma/db"
+	_ "github.com/lib/pq"
 )
 
 type options struct {
@@ -94,13 +96,14 @@ func run() error {
 		os.Exit(1)
 	}
 
-	client := db.NewClient()
-	if err := client.Prisma.Connect(); err != nil {
-		return err
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
 	}
+	boil.SetDB(db)
 
 	defer func() {
-		if err := client.Prisma.Disconnect(); err != nil {
+		if err := db.Close(); err != nil {
 			panic(err)
 		}
 	}()
@@ -120,7 +123,7 @@ func run() error {
 	secureTransport := &http.Transport{}
 	c := http.Client{Transport: secureTransport}
 
-	stream := make(chan *model.Record)
+	stream := make(chan *database.Record)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -153,18 +156,18 @@ func run() error {
 							continue
 						}
 
-						cast := model.NewCast(
+						cast := database.NewCast(
 							response.Stats.Source.Name,
 							response.Stats.Source.Description,
 							target.Url,
 						)
-						track := model.NewTrack(
+						track := database.NewTrack(
 							response.Stats.Source.Title,
 							response.Stats.Source.Listeners,
 						)
 
 						go func() {
-							stream <- &model.Record{
+							stream <- &database.Record{
 								Cast:  cast,
 								Track: track,
 							}
