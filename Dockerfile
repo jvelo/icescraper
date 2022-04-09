@@ -7,8 +7,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . ./
-COPY ./.env.prod ./env
-
 
 # build the binary with all dependencies
 RUN go build -o /icecast-monitor .

@@ -96,7 +96,8 @@ func run() error {
 		os.Exit(1)
 	}
 
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	url := os.Getenv("DATABASE_URL")
+	db, err := sql.Open("postgres", url)
 	if err != nil {
 		panic(err)
 	}
@@ -132,12 +133,9 @@ func run() error {
 	go func() {
 		for {
 			select {
-			case t := <-ticker.C:
-				log.Infof("tick %v", t)
+			case <-ticker.C:
 				go func() {
 					for _, target := range conf.Servers {
-						log.Infof("Polling target: %v", target.Url)
-
 						if target.SkipCertCheck {
 							c.Transport = insecureTransport
 						} else {
@@ -179,7 +177,7 @@ func run() error {
 	}()
 
 	http.Handle("/metrics", promhttp.Handler())
-	return http.ListenAndServe("127.0.0.1:2112", nil)
+	return http.ListenAndServe("0.0.0.0:2112", nil)
 }
 
 func doRequest(target config.IcecastServer, c http.Client) ([]byte, error) {
