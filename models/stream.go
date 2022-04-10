@@ -604,7 +604,7 @@ func (streamL) LoadCastTracks(ctx context.Context, e boil.ContextExecutor, singu
 // AddCastTracks adds the given related objects to the existing relationships
 // of the stream, optionally inserting them as new records.
 // Appends related to o.R.CastTracks.
-// Sets related.R.Stream appropriately.
+// Sets related.R.Cast appropriately.
 func (o *Stream) AddCastTracks(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Track) error {
 	var err error
 	for _, rel := range related {

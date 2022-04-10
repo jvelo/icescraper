@@ -12,7 +12,7 @@ CREATE TABLE "stream" (
 
 -- CreateTable
 CREATE TABLE "track" (
-    "id" SERIAL NOT NULL,
+    "id" BIGSERIAL NOT NULL,
     "cast_id" INTEGER NOT NULL,
     "started_at" TIMESTAMP(3) NOT NULL,
     "ended_at" TIMESTAMP(3) NOT NULL,

@@ -2,13 +2,12 @@ build:
 	go build -o icecast-monitor main.go
 
 migrate:
-	go run github.com/prisma/prisma-client-go db push --preview-feature
+	. .env && npx prisma migrate dev
 
 generate:
 	go generate ./...
 
 test:
-	DATABASE_URL=file:./test.db go run github.com/prisma/prisma-client-go db push --preview-feature
 	go test ./...
 
 run:

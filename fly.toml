@@ -1,6 +1,6 @@
-# fly.toml file generated for pbb-stats on 2022-04-09T11:46:32+02:00
+# fly.toml file generated for icescraper on 2022-04-10T07:44:38+02:00
 
-app = "pbb-stats"
+app = "icescraper"
 
 kill_signal = "SIGINT"
 kill_timeout = 5

@@ -23,7 +23,7 @@ import (
 
 // Track is an object representing the database table.
 type Track struct {
-	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	CastID    int       `boil:"cast_id" json:"cast_id" toml:"cast_id" yaml:"cast_id"`
 	StartedAt time.Time `boil:"started_at" json:"started_at" toml:"started_at" yaml:"started_at"`
 	EndedAt   time.Time `boil:"ended_at" json:"ended_at" toml:"ended_at" yaml:"ended_at"`
@@ -68,15 +68,38 @@ var TrackTableColumns = struct {
 
 // Generated where
 
+type whereHelperint64 struct{ field string }
+
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
 var TrackWhere = struct {
-	ID        whereHelperint
+	ID        whereHelperint64
 	CastID    whereHelperint
 	StartedAt whereHelpertime_Time
 	EndedAt   whereHelpertime_Time
 	Title     whereHelperstring
 	Listeners whereHelperint
 }{
-	ID:        whereHelperint{field: "\"track\".\"id\""},
+	ID:        whereHelperint64{field: "\"track\".\"id\""},
 	CastID:    whereHelperint{field: "\"track\".\"cast_id\""},
 	StartedAt: whereHelpertime_Time{field: "\"track\".\"started_at\""},
 	EndedAt:   whereHelpertime_Time{field: "\"track\".\"ended_at\""},
@@ -88,12 +111,12 @@ var TrackWhere = struct {
 var TrackRels = struct {
 	Cast string
 }{
-	Cast: "Stream",
+	Cast: "Cast",
 }
 
 // trackR is where relationships are stored.
 type trackR struct {
-	Cast *Stream `boil:"Stream" json:"Stream" toml:"Stream" yaml:"Stream"`
+	Cast *Stream `boil:"Cast" json:"Cast" toml:"Cast" yaml:"Cast"`
 }
 
 // NewStruct creates a new relationship struct
@@ -509,7 +532,7 @@ func (trackL) LoadCast(ctx context.Context, e boil.ContextExecutor, singular boo
 }
 
 // SetCast of the track to the related item.
-// Sets o.R.Stream to related.
+// Sets o.R.Cast to related.
 // Adds o to related.R.CastTracks.
 func (o *Track) SetCast(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Stream) error {
 	var err error
@@ -563,7 +586,7 @@ func Tracks(mods ...qm.QueryMod) trackQuery {
 
 // FindTrack retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindTrack(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Track, error) {
+func FindTrack(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*Track, error) {
 	trackObj := &Track{}
 
 	sel := "*"
@@ -1062,7 +1085,7 @@ func (o *TrackSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 }
 
 // TrackExists checks if the Track row exists.
-func TrackExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func TrackExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"track\" where \"id\"=$1 limit 1)"
 

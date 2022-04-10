@@ -3,7 +3,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Cast {
+model Stream {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now()) @map(name: "created_at")
   updatedAt   DateTime @updatedAt @map(name: "updated_at")
@@ -16,13 +16,13 @@ model Cast {
 }
 
 model Track {
-  id        Int      @id @default(autoincrement())
+  id        BigInt   @id @default(autoincrement())
   castId    Int      @map(name: "cast_id")
   startedAt DateTime @map(name: "started_at")
   endedAt   DateTime @map(name: "ended_at")
   title     String
   listeners Int
-  cast      Cast     @relation(fields: [castId], references: [id])
+  stream    Stream   @relation(fields: [castId], references: [id])
 
   @@unique([castId, title, startedAt])
   @@map(name: "track")
