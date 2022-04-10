@@ -1,4 +1,4 @@
-module github.com/jvelo/icecast-monitor
+module github.com/jvelo/icescraper
 
 go 1.18
 

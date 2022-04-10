@@ -2,7 +2,7 @@ package updater
 
 import (
 	"context"
-	"github.com/jvelo/icecast-monitor/db"
+	"github.com/jvelo/icescraper/db"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"time"
 )

@@ -9,6 +9,6 @@ RUN go mod download
 COPY . ./
 
 # build the binary with all dependencies
-RUN go build -o /icecast-monitor .
+RUN go build -o /icescraper .
 
-CMD ["/icecast-monitor"]
+CMD ["/icescraper"]

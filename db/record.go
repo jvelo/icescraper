@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/jvelo/icecast-monitor/models"
+	"github.com/jvelo/icescraper/models"
 	"github.com/volatiletech/null/v8"
 )
 

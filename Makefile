@@ -1,5 +1,5 @@
 build:
-	go build -o icecast-monitor main.go
+	go build -o icescraper main.go
 
 migrate:
 	. .env && npx prisma migrate dev
@@ -17,6 +17,6 @@ lint:
 	golangci-lint run
 
 docker:
-	docker build -t jvelo/icecast-monitor .
+	docker build -t jvelo/icescraper .
 
 all: build

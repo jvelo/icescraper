@@ -1,7 +1,8 @@
-icecast-monitor
+icescraper
 .idea
 prisma/dev.db
 prisma/test.db
 .help
 .env
 .env.prod
+config.yml
