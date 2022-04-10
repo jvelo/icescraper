@@ -1,4 +1,4 @@
-![Badly hand-drawn ice scraper used as a logo](./icescraper.png?raw=true|width=100px)
+<img src="./icescraper.png" width="100" alt="Badly hand-drawn ice scraper used as a logo">
 
 # Prerequisites
 
