@@ -10,7 +10,7 @@ import (
 const upsertTrackQuery = `
 -- Upsert track
 WITH track_cast AS (SELECT id FROM stream WHERE name = $1 LIMIT 1),
-     latest_track AS (SELECT * FROM track ORDER BY started_at DESC LIMIT 1),
+     latest_track AS (SELECT * FROM track WHERE cast_id = (SELECT id FROM track_cast) ORDER BY started_at DESC LIMIT 1),
      new_track (title, started_at, ended_at, listeners) AS (SELECT * FROM (VALUES ($2, $3::timestamp, $4::timestamp, $5::int)) v),
      raw (title, started_at, cast_id, ended_at, listeners) AS (
          SELECT title,
