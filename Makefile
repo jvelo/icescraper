@@ -19,4 +19,7 @@ lint:
 docker:
 	docker build -t jvelo/icescraper .
 
+deploy:
+	flyctl deploy
+
 all: build
